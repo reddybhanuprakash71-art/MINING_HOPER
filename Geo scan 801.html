@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="rIL8zwSR_DKw4sx_ISRcTx5bvHL7-EQ5gZZuoiOpflQ">
+
+  <title>Mining Inspection Robot | Geo Scan-801</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+  :root{
+    --bg:#0A0E0C;
+    --panel:#121815;
+    --panel-2:#171F1A;
+    --steel:#2E3830;
+    --steel-dim:#20261F;
+    --amber:#FFB020;
+    --amber-dim:#8a6317;
+    --orange:#FF4B1F;
+    --green:#3ED598;
+    --cyan:#33E0C8;
+    --text:#E7ECE7;
+    --text-dim:#8B9A8F;
+    --text-faint:#586359;
+    --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(255,176,32,0.05), transparent 45%),
+      radial-gradient(ellipse at 100% 100%, rgba(51,224,200,0.04), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber); color:#111;}
+  a{color:inherit;}
+
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .disp{font-family:'Oswald', sans-serif; text-transform:uppercase; letter-spacing:0.04em;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--steel);
+    border-radius:var(--radius);
+    position:relative;
+  }
+  .bracket{position:relative;}
+  .bracket::before,.bracket::after{
+    content:"";
+    position:absolute;
+    width:14px; height:14px;
+    border:2px solid var(--amber-dim);
+    opacity:0.7;
+  }
+  .bracket::before{top:-1px; left:-1px; border-right:none; border-bottom:none;}
+  .bracket::after{bottom:-1px; right:-1px; border-left:none; border-top:none;}
+
+  .shell{
+    max-width:1320px;
+    margin:0 auto;
+    padding:22px 24px 60px;
+  }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--steel);
+    margin-bottom:22px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:44px; height:44px;
+    border:2px solid var(--amber);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::before{
+    content:"";
+    width:8px; height:8px;
+    background:var(--amber);
+    border-radius:50%;
+    box-shadow:0 0 10px var(--amber);
+  }
+  .brand-mark svg{position:absolute; inset:-2px;}
+  .brand-title{font-family:'Oswald', sans-serif; font-weight:700; font-size:26px; letter-spacing:0.03em; text-transform:uppercase;}
+  .brand-sub{font-size:11px; color:var(--text-faint); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;}
+
+  .status-cluster{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .status-chip{
+    display:flex; align-items:center; gap:8px;
+    padding:8px 14px;
+    border:1px solid var(--steel);
+    border-radius:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--text-dim);
+    background:var(--panel);
+  }
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0;}
+  .dot.live{background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 1.6s infinite;}
+  .dot.warn{background:var(--orange); box-shadow:0 0 8px var(--orange); animation:pulse 0.7s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.35;}}
+
+  .btn-connect{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    background:var(--amber); color:#141008; border:none;
+    padding:10px 20px; border-radius:20px; font-weight:600;
+    cursor:pointer; transition:filter 0.15s, transform 0.1s;
+  }
+  .btn-connect:hover{filter:brightness(1.1);}
+  .btn-connect:active{transform:scale(0.97);}
+  .btn-connect.connected{background:transparent; border:1px solid var(--green); color:var(--green);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:340px 1fr 300px;
+    gap:18px;
+    align-items:start;
+  }
+  @media (max-width:1100px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 16px;
+    border-bottom:1px solid var(--steel);
+  }
+  .panel-head h2{font-size:13px; letter-spacing:0.1em;}
+  .panel-body{padding:16px;}
+
+  /* Radar Styling */
+  .radar-wrap{display:flex; flex-direction:column; align-items:center; padding:18px 16px 22px;}
+  .radar{
+    width:260px; height:260px;
+    position:relative;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(51,224,200,0.06), transparent 70%),
+      var(--bg);
+    border:1px solid var(--steel);
+    overflow:hidden;
+  }
+  .radar-ring{
+    position:absolute; border:1px solid var(--steel-dim); border-radius:50%;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+  }
+  .radar-ring.r1{width:25%; height:25%;}
+  .radar-ring.r2{width:50%; height:50%;}
+  .radar-ring.r3{width:75%; height:75%;}
+  .radar-ring.r4{width:100%; height:100%;}
+  .radar-cross{position:absolute; background:var(--steel-dim);}
+  .radar-cross.h{width:100%; height:1px; top:50%; left:0;}
+  .radar-cross.v{height:100%; width:1px; left:50%; top:0;}
+  .radar-sweep{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:conic-gradient(from 0deg, rgba(51,224,200,0.55), transparent 26%);
+    transform-origin:50% 50%;
+    animation:sweep 3.2s linear infinite;
+    border-radius:50%;
+  }
+  @keyframes sweep{ to{ transform:rotate(360deg); } }
+  .radar-blip{
+    position:absolute;
+    width:10px; height:10px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 12px var(--amber);
+    top:50%; left:50%;
+    transform:translate(-50%,-50%) translateY(-90px);
+    transition:transform 0.35s ease, background 0.2s, box-shadow 0.2s;
+  }
+  .radar-blip.danger{background:var(--orange); box-shadow:0 0 16px var(--orange);}
+  .radar-readout{text-align:center; margin-top:16px;}
+  .radar-readout .value{
+    font-family:'Oswald', sans-serif; font-weight:600; font-size:44px; line-height:1;
+    color:var(--amber);
+  }
+  .radar-readout .value.danger{color:var(--orange);}
+  .radar-readout .unit{font-size:13px; color:var(--text-dim); letter-spacing:0.08em; margin-left:4px;}
+
+  /* Telemetry Cards */
+  .telemetry-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .tcard{
+    padding:14px 16px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .tcard-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .tcard-label{font-size:11px; letter-spacing:0.12em; color:var(--text-dim);}
+  .tcard-icon{width:20px; height:20px; opacity:0.85; flex-shrink:0;}
+  .tcard-value{font-family:'Oswald', sans-serif; font-weight:600; font-size:30px; line-height:1;}
+  .tcard-value .u{font-size:14px; color:var(--text-dim); font-family:'IBM Plex Mono', monospace; margin-left:3px;}
+  .gauge-track{width:100%; height:5px; background:var(--steel-dim); border-radius:3px; overflow:hidden;}
+  .gauge-fill{height:100%; background:var(--cyan); border-radius:3px; width:0%; transition:width 0.4s ease, background 0.3s;}
+  .gauge-fill.warn{background:var(--amber);}
+  .gauge-fill.crit{background:var(--orange);}
+
+  .flame-card{grid-column:span 2; flex-direction:row; align-items:center; justify-content:space-between;}
+  .flame-status{display:flex; align-items:center; gap:12px;}
+  .flame-dot{width:14px; height:14px; border-radius:50%; background:var(--steel); flex-shrink:0; transition:all 0.2s;}
+  .flame-dot.alert{background:var(--orange); box-shadow:0 0 14px var(--orange); animation:pulse 0.4s infinite;}
+  .flame-text{font-family:'Oswald', sans-serif; font-size:16px; letter-spacing:0.03em; text-transform:uppercase;}
+  .flame-text.alert{color:var(--orange);}
+
+  /* Directional Pad Controls */
+  .dpad{
+    display:grid;
+    grid-template-columns:64px 64px 64px;
+    grid-template-rows:64px 64px 64px;
+    gap:8px;
+    justify-content:center;
+    padding:20px 0 12px;
+  }
+  .dbtn{
+    background:var(--panel-2);
+    border:1px solid var(--steel);
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    color:var(--text-dim);
+    transition:background 0.1s, border-color 0.1s, color 0.1s;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    touch-action:none;
+  }
+  .dbtn svg{width:22px; height:22px;}
+  .dbtn:hover{border-color:var(--amber-dim); color:var(--text);}
+  .dbtn:active, .dbtn.pressed{background:var(--amber); border-color:var(--amber); color:#141008;}
+  .dbtn.stop{border-color:var(--orange); color:var(--orange);}
+  .dbtn.stop:active, .dbtn.stop.pressed{background:var(--orange); color:#1a0800;}
+  .dbtn.up{grid-column:2; grid-row:1;}
+  .dbtn.left{grid-column:1; grid-row:2;}
+  .dbtn.stop{grid-column:2; grid-row:2;}
+  .dbtn.right{grid-column:3; grid-row:2;}
+  .dbtn.down{grid-column:2; grid-row:3;}
+
+  .speed-box {
+    padding:14px 16px;
+    border-top:1px solid var(--steel);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+  .speed-header {
+    display:flex; justify-content:space-between; margin-bottom:8px; color:var(--text-dim);
+  }
+  input[type=range] {
+    width:100%;
+    accent-color:var(--amber);
+    background:var(--steel-dim);
+    cursor:pointer;
+  }
+
+  .db-status{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 16px; border-top:1px solid var(--steel);
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-dim);
+  }
+
+  /* Audio Alert Status Box */
+  .audio-alert-box {
+    padding:10px 16px;
+    border-top:1px solid var(--steel);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--amber);
+    background: rgba(255, 176, 32, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer{
+    margin-top:22px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-faint);
+    padding-top:16px; border-top:1px solid var(--steel);
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="none" stroke="#2E3830" stroke-width="1" stroke-dasharray="2 4"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">Geo Scan-801</div>
+        <div class="brand-sub">Mining Inspection Hopper &middot; Remote Console</div>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <div class="status-chip"><span class="dot" id="bleDot"></span><span id="status">Bluetooth: Disconnected</span></div>
+      <div class="status-chip"><span class="dot" id="dbDot"></span><span id="db-status">Supabase: Idle</span></div>
+      <button class="btn-connect" id="connectBtn" onclick="toggleConnection()">CONNECT TO ROVER</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT PANEL: Sonar Radar & IP -->
+    <div class="panel bracket">
+      <div class="panel-head"><h2 class="eyebrow">Proximity scan &middot; ultrasonic</h2></div>
+      <div class="radar-wrap">
+        <div class="radar">
+          <div class="radar-ring r1"></div>
+          <div class="radar-ring r2"></div>
+          <div class="radar-ring r3"></div>
+          <div class="radar-ring r4"></div>
+          <div class="radar-cross h"></div>
+          <div class="radar-cross v"></div>
+          <div class="radar-sweep"></div>
+          <div class="radar-blip" id="radarBlip"></div>
+        </div>
+        <div class="radar-readout">
+          <div><span class="value" id="dist">--</span><span class="unit">CM</span></div>
+          <div class="eyebrow" style="margin-top:6px;">Distance Reading</div>
+        </div>
+      </div>
+      <div class="audio-alert-box">
+        <span>Audio Status:</span>
+        <span id="audio-display">Ready</span>
+      </div>
+      <div class="db-status">
+        <span id="ip-display">Client IP: Fetching...</span>
+      </div>
+    </div>
+
+    <!-- CENTER PANEL: Environmental Telemetry -->
+    <div class="panel">
+      <div class="panel-head"><h2 class="eyebrow">Environmental &amp; Gas Telemetry</h2></div>
+      <div class="panel-body">
+        <div class="telemetry-grid">
+
+          <div class="tcard panel">
+            <div class="tcard-top">
+              <span class="tcard-label">GAS SENSOR<br>MQ&#8209;2</span>
+              <svg class="tcard-icon" viewBox="0 0 24 24" fill="none" stroke="#8B9A8F" stroke-width="1.6"><path d="M12 2v6M8 8l4-6 4 6M6 22h12l-1.5-9h-9L6 22z"/></svg>
+            </div>
+            <div class="tcard-value"><span id="mq2">--</span><span class="u">ppm</span></div>
+            <div class="gauge-track"><div class="gauge-fill" id="mq2Fill"></div></div>
+          </div>
+
+          <div class="tcard panel">
+            <div class="tcard-top">
+              <span class="tcard-label">AIR QUALITY<br>MQ&#8209;135</span>
+              <svg class="tcard-icon" viewBox="0 0 24 24" fill="none" stroke="#8B9A8F" stroke-width="1.6"><path d="M3 8h11a3 3 0 100-6M3 16h15a3 3 0 110 6M3 12h8a2.5 2.5 0 100-5"/></svg>
+            </div>
+            <div class="tcard-value"><span id="mq135">--</span><span class="u">ppm</span></div>
+            <div class="gauge-track"><div class="gauge-fill" id="mq135Fill"></div></div>
+          </div>
+
+          <div class="tcard panel">
+            <div class="tcard-top">
+              <span class="tcard-label">TEMPERATURE</span>
+              <svg class="tcard-icon" viewBox="0 0 24 24" fill="none" stroke="#8B9A8F" stroke-width="1.6"><path d="M12 3a2 2 0 00-2 2v9.5a4 4 0 102 0V5a2 2 0 00-0-2z"/></svg>
+            </div>
+            <div class="tcard-value"><span id="temp">--</span><span class="u">&deg;C</span></div>
+            <div class="gauge-track"><div class="gauge-fill" id="tempFill"></div></div>
+          </div>
+
+          <div class="tcard panel">
+            <div class="tcard-top">
+              <span class="tcard-label">HUMIDITY</span>
+              <svg class="tcard-icon" viewBox="0 0 24 24" fill="none" stroke="#8B9A8F" stroke-width="1.6"><path d="M12 2s6 7 6 11.5a6 6 0 11-12 0C6 9 12 2 12 2z"/></svg>
+            </div>
+            <div class="tcard-value"><span id="hum">--</span><span class="u">%</span></div>
+            <div class="gauge-track"><div class="gauge-fill" id="humFill"></div></div>
+          </div>
+
+          <div class="tcard panel flame-card">
+            <div class="flame-status">
+              <div class="flame-dot" id="flameDot"></div>
+              <div>
+                <div class="tcard-label">FLAME SENSOR</div>
+                <div class="flame-text" id="flame">Safe</div>
+              </div>
+            </div>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8B9A8F" stroke-width="1.6"><path d="M12 2c2 3-2 4-2 7a3 3 0 106 0c0-1-1-2-1-2 2 1 3 3 3 5a6 6 0 11-12 0c0-4 3-6 6-10z"/></svg>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Drive Control -->
+    <div class="panel bracket">
+      <div class="panel-head"><h2 class="eyebrow">Drive control &middot; Movement</h2></div>
+      <div class="dpad">
+        <button class="dbtn up" title="Forward" 
+                onpointerdown="sendCommand('F')" 
+                onpointerup="sendCommand('S')" 
+                onpointerleave="sendCommand('S')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16M12 4l-6 6M12 4l6 6"/></svg>
+        </button>
+        <button class="dbtn left" title="Left" 
+                onpointerdown="sendCommand('L')" 
+                onpointerup="sendCommand('S')" 
+                onpointerleave="sendCommand('S')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12H4M4 12l6-6M4 12l6 6"/></svg>
+        </button>
+        <button class="dbtn stop" title="Stop" onpointerdown="sendCommand('S')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+        </button>
+        <button class="dbtn right" title="Right" 
+                onpointerdown="sendCommand('R')" 
+                onpointerup="sendCommand('S')" 
+                onpointerleave="sendCommand('S')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M20 12l-6-6M20 12l-6 6"/></svg>
+        </button>
+        <button class="dbtn down" title="Backward" 
+                onpointerdown="sendCommand('B')" 
+                onpointerup="sendCommand('S')" 
+                onpointerleave="sendCommand('S')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V4M12 20l-6-6M12 20l6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="speed-box">
+        <div class="speed-header">
+          <span>SPEED REGULATOR</span>
+          <span><span id="speedVal">400</span> / 500 RPM</span>
+        </div>
+        <input id="speedRange" type="range" min="0" max="500" value="400" onchange="sendSpeed(this.value)" oninput="document.getElementById('speedVal').innerText = this.value">
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Geo Scan-801</span>
+    <span id="clock">--:--:--</span>
+  </footer>
+</div>
+
+<script>
+  // --- SUPABASE CONFIGURATION ---
+  const SUPABASE_URL = "https://zaiqkyzzckyjtwyvrapp.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphaXFreXp6Y2t5anR3eXZyYXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1MTg1NTQsImV4cCI6MjEwMTA5NDU1NH0.3NhMHlQjvY8hZ2KR_EgfW5y7DT7r-ZJQ4AQinTkAAcY";
+  const DEVICE_ID = "rover-01";
+  let lastSupabasePush = 0;
+  let currentSessionId = null;
+  let clientIP = "Unknown";
+  let bluetoothDeviceName = "Unknown";
+  let lastCommand = null;
+  let lastSpokenCategory = null; // Prevent repeating identical audio alerts continuously
+
+  // Clock footer updater
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
+  }, 1000);
+
+  // --- Fetch Client Public IP on Load ---
+  async function fetchClientIP() {
+    try {
+      let res = await fetch('https://api.ipify.org?format=json');
+      let data = await res.json();
+      clientIP = data.ip;
+      document.getElementById('ip-display').innerText = "Client IP: " + clientIP;
+    } catch (e) {
+      console.error("Could not fetch IP", e);
+      document.getElementById('ip-display').innerText = "Client IP: Unavailable";
+    }
+  }
+  fetchClientIP();
+
+  // --- BLE CONFIGURATION (Supports Any Device) ---
+  const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
+  const COMMAND_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
+  const TELEMETRY_UUID = "19b10002-e8f2-537e-4f6c-d104768a1214";
+  
+  let bleDevice;
+  let commandCharacteristic = null;
+  let telemetryBuffer = "";
+
+  async function toggleConnection() {
+    if (bleDevice && bleDevice.gatt.connected) {
+      bleDevice.gatt.disconnect();
+    } else {
+      await connectBLE();
+    }
+  }
+
+  async function connectBLE() {
+    try {
+      document.getElementById('status').innerText = "Bluetooth: Scanning all devices...";
+      
+      bleDevice = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          SERVICE_UUID,
+          "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART
+          "0000ffe0-0000-1000-8000-00805f9b34fb"  // HM-10 / Generic BLE
+        ]
+      });
+
+      bluetoothDeviceName = bleDevice.name || 'Generic Bluetooth Device';
+      bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+      
+      document.getElementById('status').innerText = "Connecting: " + bluetoothDeviceName;
+      const server = await bleDevice.gatt.connect();
+
+      let serviceFound = false;
+      try {
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        commandCharacteristic = await service.getCharacteristic(COMMAND_UUID);
+        const telemetryCharacteristic = await service.getCharacteristic(TELEMETRY_UUID);
+
+        await telemetryCharacteristic.startNotifications();
+        telemetryCharacteristic.addEventListener('characteristicvaluechanged', handleTelemetry);
+        serviceFound = true;
+      } catch (e) {
+        console.warn("Primary service UUID not found. Auto-discovering characteristics...", e);
+      }
+
+      if (!serviceFound) {
+        const services = await server.getPrimaryServices();
+        for (const s of services) {
+          const characteristics = await s.getCharacteristics();
+          for (const c of characteristics) {
+            if ((c.properties.write || c.properties.writeWithoutResponse) && !commandCharacteristic) {
+              commandCharacteristic = c;
+            }
+            if (c.properties.notify || c.properties.indicate) {
+              await c.startNotifications();
+              c.addEventListener('characteristicvaluechanged', handleTelemetry);
+            }
+          }
+        }
+      }
+
+      document.getElementById('status').innerText = "Bluetooth: Connected (" + bluetoothDeviceName + ")";
+      document.getElementById('bleDot').className = "dot live";
+      
+      const connectBtn = document.getElementById('connectBtn');
+      connectBtn.innerText = "DISCONNECT";
+      connectBtn.classList.add('connected');
+
+      await logSessionStart();
+
+    } catch (error) {
+      console.error("Error connecting BLE:", error);
+      document.getElementById('status').innerText = "Connection Failed: " + error.message;
+      document.getElementById('bleDot').className = "dot warn";
+    }
+  }
+
+  async function logSessionStart() {
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/bluetooth_sessions`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          device_id: DEVICE_ID,
+          bluetooth_name: bluetoothDeviceName,
+          client_ip: clientIP,
+          user_agent: navigator.userAgent
+        })
+      });
+      const result = await response.json();
+      if (result && result.length > 0) {
+        currentSessionId = result[0].id;
+      }
+    } catch (err) {
+      console.error("Error logging session start:", err);
+    }
+  }
+
+  async function onDisconnected() {
+    document.getElementById('status').innerText = "Bluetooth: Disconnected";
+    document.getElementById('bleDot').className = "dot";
+    
+    const connectBtn = document.getElementById('connectBtn');
+    connectBtn.innerText = "CONNECT TO ROVER";
+    connectBtn.classList.remove('connected');
+
+    commandCharacteristic = null;
+
+    if (currentSessionId) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/bluetooth_sessions?id=eq.${currentSessionId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            disconnected_at: new Date().toISOString()
+          })
+        });
+      } catch (err) {
+        console.error("Error logging session disconnect:", err);
+      }
+      currentSessionId = null;
+    }
+  }
+
+  async function sendCommand(cmd) {
+    if (cmd === lastCommand) return;
+    lastCommand = cmd;
+    
+    if (!commandCharacteristic) return;
+    
+    try {
+      let encoder = new TextEncoder();
+      let payload = encoder.encode(cmd);
+      
+      if (commandCharacteristic.writeValueWithoutResponse) {
+        await commandCharacteristic.writeValueWithoutResponse(payload);
+      } else {
+        await commandCharacteristic.writeValue(payload);
+      }
+      
+      let currentSpeed = parseInt(document.getElementById('speedRange').value);
+      logVehicleControl(cmd, currentSpeed);
+    } catch (error) {
+      console.error("Command failed:", error);
+      lastCommand = null;
+    }
+  }
+
+  async function sendSpeed(val) {
+    if (!commandCharacteristic) return;
+    try {
+      let encoder = new TextEncoder();
+      let payload = encoder.encode('V' + val);
+      
+      if (commandCharacteristic.writeValueWithoutResponse) {
+        await commandCharacteristic.writeValueWithoutResponse(payload);
+      } else {
+        await commandCharacteristic.writeValue(payload);
+      }
+      
+      logVehicleControl('SPEED_' + val, parseInt(val));
+    } catch (error) {
+      console.error("Speed command failed:", error);
+    }
+  }
+
+  async function logVehicleControl(commandName, currentSpeed) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/vehicle_controls`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          device_id: DEVICE_ID,
+          bluetooth_name: bluetoothDeviceName,
+          client_ip: clientIP,
+          command: commandName,
+          speed: currentSpeed
+        })
+      });
+    } catch (err) {
+      console.error("Network Error logging control:", err);
+    }
+  }
+
+  function handleTelemetry(event) {
+    let decoder = new TextDecoder('utf-8');
+    telemetryBuffer += decoder.decode(event.target.value, { stream: true });
+    
+    while (telemetryBuffer.includes('{') && telemetryBuffer.includes('}')) {
+      let startIndex = telemetryBuffer.indexOf('{');
+      let endIndex = telemetryBuffer.indexOf('}');
+      
+      if (endIndex < startIndex) {
+        telemetryBuffer = telemetryBuffer.substring(endIndex + 1);
+        continue;
+      }
+      
+      let jsonString = telemetryBuffer.substring(startIndex, endIndex + 1);
+      telemetryBuffer = telemetryBuffer.substring(endIndex + 1);
+      
+      try {
+        let data = JSON.parse(jsonString);
+        updateDashboard(data);
+      } catch (e) {
+        console.warn("Failed to parse buffered telemetry:", jsonString);
+      }
+    }
+  }
+
+  // --- SPEECH OUTPUT & THRESHOLD CHECKER ---
+  function evaluateAndSpeakLevels(gasVal, airVal) {
+    let maxVal = Math.max(gasVal || 0, airVal || 0);
+    let category = "";
+
+    if (maxVal >= 400 && maxVal < 900) {
+      category = "Safe";
+    } else if (maxVal >= 900 && maxVal < 1800) {
+      category = "Unsafe";
+    } else if (maxVal >= 1800 && maxVal <= 4095) {
+      category = "Danger";
+    } else if (maxVal > 4095) {
+      category = "Danger";
+    } else {
+      return; // Below reporting threshold
+    }
+
+    // Display status command text on webpage
+    let displayText = `Level: ${category} (${maxVal} ppm)`;
+    document.getElementById('audio-display').innerText = displayText;
+
+    // Speak via browser device speech synthesis if category changes
+    if (category !== lastSpokenCategory) {
+      lastSpokenCategory = category;
+      speakMessage(`Warning! Gas and air levels are ${category.toLowerCase()}`);
+    }
+  }
+
+  function speakMessage(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop any overlapping speech
+      let utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function updateDashboard(data) {
+    document.getElementById('dist').innerText = (data.d !== undefined && data.d !== null) ? data.d : '--';
+    
+    document.getElementById('mq2').innerText = (data.g !== undefined && data.g !== null) ? data.g : '--';
+    document.getElementById('mq135').innerText = (data.a !== undefined && data.a !== null) ? data.a : '--';
+    
+    // Evaluate thresholds and trigger device audio output
+    evaluateAndSpeakLevels(Number(data.g), Number(data.a));
+
+    if (data.t !== undefined && data.t !== null && !isNaN(Number(data.t))) {
+      document.getElementById('temp').innerText = Number(data.t).toFixed(1);
+    } else {
+      document.getElementById('temp').innerText = '--';
+    }
+
+    if (data.h !== undefined && data.h !== null && !isNaN(Number(data.h))) {
+      document.getElementById('hum').innerText = Number(data.h).toFixed(1);
+    } else {
+      document.getElementById('hum').innerText = '--';
+    }
+    
+    const flameOn = data.f === 1 || data.f === "1" || data.flame === 1;
+    const flameEl = document.getElementById('flame');
+    flameEl.innerText = flameOn ? 'FIRE DETECTED' : 'Safe';
+    flameEl.className = 'flame-text' + (flameOn ? ' alert' : '');
+    document.getElementById('flameDot').className = 'flame-dot' + (flameOn ? ' alert' : '');
+
+    updateGaugeVisuals(data);
+
+    let now = Date.now();
+    if (now - lastSupabasePush >= 2000) {
+      lastSupabasePush = now;
+      pushToSupabase(data);
+    }
+  }
+
+  function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+  function updateGaugeVisuals(data) {
+    const radarBlip = document.getElementById('radarBlip');
+    if (typeof data.d === 'number') {
+      const r = clamp(8 + (clamp(data.d, 0, 200) / 200) * 112, 8, 120);
+      radarBlip.style.transform = `translate(-50%,-50%) translateY(-${r}px)`;
+      radarBlip.classList.toggle('danger', data.d < 20);
+    }
+
+    if (typeof data.g === 'number') document.getElementById('mq2Fill').style.width = clamp((data.g / 800) * 100, 0, 100) + '%';
+    if (typeof data.a === 'number') document.getElementById('mq135Fill').style.width = clamp((data.a / 1000) * 100, 0, 100) + '%';
+    if (typeof data.t === 'number') document.getElementById('tempFill').style.width = clamp((data.t / 50) * 100, 0, 100) + '%';
+    if (typeof data.h === 'number') document.getElementById('humFill').style.width = clamp(data.h, 0, 100) + '%';
+  }
+
+  async function pushToSupabase(data) {
+    document.getElementById('db-status').innerText = "Supabase: Syncing...";
+    document.getElementById('dbDot').className = "dot live";
+    try {
+      const tempVal = (data.t !== undefined && data.t !== null && !isNaN(Number(data.t))) ? Number(data.t) : null;
+      const humVal = (data.h !== undefined && data.h !== null && !isNaN(Number(data.h))) ? Number(data.h) : null;
+
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/sensor_readings`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          device_id: DEVICE_ID,
+          bluetooth_name: bluetoothDeviceName,
+          client_ip: clientIP,
+          temperature_c: tempVal,
+          humidity_pct: humVal,
+          distance_cm: data.d,
+          mq2_ppm: data.g,
+          mq135_ppm: data.a,
+          flame_detected: data.f === 1 || data.f === "1"
+        })
+      });
+
+      if (response.ok) {
+        let timeString = new Date().toLocaleTimeString();
+        document.getElementById('db-status').innerText = "Supabase: Synced (" + timeString + ")";
+        document.getElementById('dbDot').className = "dot live";
+      } else {
+        let errorText = await response.text();
+        console.error("Supabase Error Details:", errorText);
+        document.getElementById('db-status').innerText = "Supabase: Error";
+        document.getElementById('dbDot').className = "dot warn";
+      }
+    } catch (err) {
+      console.error("Network Error:", err);
+      document.getElementById('db-status').innerText = "Supabase: Network Error";
+      document.getElementById('dbDot').className = "dot warn";
+    }
+  }
+</script>
+</body>
+</html>
